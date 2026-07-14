@@ -1,0 +1,21 @@
+@startuml jwt-auth
+' Alur JWT — sequence diagram
+
+actor Client as C
+participant "API Laravel" as A
+database Database as D
+
+C -> A : POST /api/auth/login
+A -> D : validasi users
+A -> A : generate JWT
+A -> D : simpan refresh_tokens
+A --> C : access_token
+
+C -> A : GET /api Bearer token
+A --> C : response
+
+C -> A : POST /api/auth/logout
+A -> D : revoke refresh_token
+A --> C : 200 OK
+
+@enduml

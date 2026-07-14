@@ -1,0 +1,37 @@
+@startuml erd-simple
+' ERD ringkas — hanya relasi
+
+skinparam linetype ortho
+
+entity users
+entity refresh_tokens
+entity categories
+entity products
+entity addresses
+entity cart_items
+entity orders
+entity order_items
+entity pickup_proofs
+entity favorites
+entity activity_logs
+
+users ||--o{ refresh_tokens
+users ||--o{ addresses
+users ||--o{ cart_items
+users ||--o{ orders
+users ||--o{ favorites
+users ||--o{ activity_logs
+users ||--o{ pickup_proofs
+
+categories ||--o{ products
+
+products ||--o{ cart_items
+products ||--o{ order_items
+products ||--o{ favorites
+
+addresses ||--o{ orders
+
+orders ||--|{ order_items
+orders ||--o| pickup_proofs
+
+@enduml

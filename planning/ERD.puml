@@ -1,0 +1,201 @@
+@startuml erd-main
+' Mantri Tani — ERD Utama (13 tabel)
+' Paste SELURUH file ini ke https://www.plantuml.com/plantuml/uml
+
+skinparam linetype ortho
+skinparam classBackgroundColor #f0fdf4
+skinparam classBorderColor #059669
+
+entity "users" as users {
+  * id : bigint <<PK>>
+  --
+  name : varchar
+  email : varchar <<UK>>
+  phone : varchar <<UK>>
+  password : varchar
+  role : varchar
+  email_verified_at : timestamp
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "refresh_tokens" as refresh_tokens {
+  * id : bigint <<PK>>
+  --
+  * user_id : bigint <<FK>>
+  token_hash : varchar <<UK>>
+  expires_at : timestamp
+  revoked_at : timestamp
+  created_at : timestamp
+}
+
+entity "categories" as categories {
+  * id : bigint <<PK>>
+  --
+  name : varchar
+  slug : varchar <<UK>>
+  icon : varchar
+  color : varchar
+  description : text
+  display_order : int
+  is_active : boolean
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "products" as products {
+  * id : bigint <<PK>>
+  --
+  * category_id : bigint <<FK>>
+  name : varchar
+  slug : varchar <<UK>>
+  description : text
+  price : decimal
+  stock : int
+  emoji : varchar
+  image_path : varchar
+  badge : varchar
+  status : varchar
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "addresses" as addresses {
+  * id : bigint <<PK>>
+  --
+  * user_id : bigint <<FK>>
+  label : varchar
+  recipient_name : varchar
+  phone : varchar
+  street : text
+  district : varchar
+  is_default : boolean
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "cart_items" as cart_items {
+  * id : bigint <<PK>>
+  --
+  * user_id : bigint <<FK>>
+  * product_id : bigint <<FK>>
+  quantity : int
+  is_selected : boolean
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "orders" as orders {
+  * id : bigint <<PK>>
+  --
+  code : varchar <<UK>>
+  * user_id : bigint <<FK>>
+  address_id : bigint <<FK>>
+  buyer_name : varchar
+  buyer_phone : varchar
+  subtotal : decimal
+  admin_fee : decimal
+  total : decimal
+  payment_status : varchar
+  pickup_status : varchar
+  payment_method : varchar
+  midtrans_order_id : varchar
+  midtrans_transaction_id : varchar
+  snap_token : varchar
+  paid_at : timestamp
+  expired_at : timestamp
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "order_items" as order_items {
+  * id : bigint <<PK>>
+  --
+  * order_id : bigint <<FK>>
+  * product_id : bigint <<FK>>
+  product_name : varchar
+  unit_price : decimal
+  quantity : int
+  subtotal : decimal
+}
+
+entity "pickup_proofs" as pickup_proofs {
+  * id : bigint <<PK>>
+  --
+  order_id : bigint <<FK>>
+  * verified_by : bigint <<FK>>
+  photo_path : varchar
+  note : text
+  verified_at : timestamp
+}
+
+entity "midtrans_settings" as midtrans_settings {
+  * id : bigint <<PK>>
+  --
+  server_key : varchar
+  client_key : varchar
+  mode : varchar
+  notification_url : varchar
+  finish_url : varchar
+  unfinish_url : varchar
+  error_url : varchar
+  expiry_duration : int
+  is_active : boolean
+  updated_at : timestamp
+}
+
+entity "payment_channels" as payment_channels {
+  * id : bigint <<PK>>
+  --
+  code : varchar <<UK>>
+  name : varchar
+  channel_group : varchar
+  icon : varchar
+  color : varchar
+  is_enabled : boolean
+}
+
+entity "favorites" as favorites {
+  * id : bigint <<PK>>
+  --
+  * user_id : bigint <<FK>>
+  * product_id : bigint <<FK>>
+  created_at : timestamp
+}
+
+entity "activity_logs" as activity_logs {
+  * id : bigint <<PK>>
+  --
+  user_id : bigint <<FK>>
+  action : varchar
+  subject_type : varchar
+  subject_id : bigint
+  description : text
+  created_at : timestamp
+}
+
+users ||--o{ refresh_tokens
+users ||--o{ addresses
+users ||--o{ cart_items
+users ||--o{ orders
+users ||--o{ favorites
+users ||--o{ activity_logs
+users ||--o{ pickup_proofs
+
+categories ||--o{ products
+
+products ||--o{ cart_items
+products ||--o{ order_items
+products ||--o{ favorites
+
+addresses ||--o{ orders
+
+orders ||--|{ order_items
+orders ||--o| pickup_proofs
+
+note bottom of orders
+  payment_status: menunggu_pembayaran, lunas, expired
+  pickup_status: menunggu_approval, disetujui, selesai, ditolak
+end note
+
+@enduml

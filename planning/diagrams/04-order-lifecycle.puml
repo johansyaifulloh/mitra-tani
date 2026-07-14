@@ -1,0 +1,24 @@
+@startuml order-lifecycle
+' Lifecycle order — state diagram
+
+hide empty description
+
+[*] --> MenungguPembayaran : checkout
+
+MenungguPembayaran --> Lunas : Midtrans settlement
+MenungguPembayaran --> Expired : timeout
+
+state Lunas {
+  [*] --> MenungguApproval
+}
+
+MenungguApproval --> Disetujui : admin verifikasi
+MenungguApproval --> Ditolak : admin tolak
+
+Disetujui --> Selesai : finalisasi
+
+Selesai --> [*]
+Ditolak --> [*]
+Expired --> [*]
+
+@enduml

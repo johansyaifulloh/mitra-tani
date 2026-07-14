@@ -1,0 +1,18 @@
+@startuml midtrans-snap
+' Alur Midtrans Snap — sequence diagram
+
+actor Pelanggan as C
+participant "Mantri Tani" as T
+participant Midtrans as M
+
+C -> T : checkout
+T -> M : POST Snap transaction
+M --> T : snap_token
+T -> T : simpan ke orders
+T --> C : tampilkan Snap
+C -> M : bayar
+M -> T : POST notification webhook
+T -> T : update payment_status
+M --> C : redirect finish_url
+
+@enduml

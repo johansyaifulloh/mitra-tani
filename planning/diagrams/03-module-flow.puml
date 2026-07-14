@@ -1,0 +1,48 @@
+@startuml module-flow
+' Alur modul — component diagram
+
+skinparam componentStyle rectangle
+
+package "Auth dan User" as pkg_auth #e8f5e9 {
+  component [users] as U
+  component [refresh_tokens] as RT
+}
+
+package "Katalog" as pkg_cat #fff8e1 {
+  component [categories] as CAT
+  component [products] as PRD
+}
+
+package "Pelanggan" as pkg_cust #e3f2fd {
+  component [addresses] as ADR
+  component [cart_items] as CRT
+  component [favorites] as FAV
+}
+
+package "Transaksi dan Pickup" as pkg_trx #fce4ec {
+  component [orders] as ORD
+  component [order_items] as OIT
+  component [pickup_proofs] as PUP
+}
+
+package "Midtrans" as pkg_pay #f3e5f5 {
+  component [midtrans_settings] as MTS
+  component [payment_channels] as PCH
+}
+
+U --> RT
+CAT --> PRD
+U --> ADR
+U --> CRT
+U --> FAV
+U --> ORD
+U --> PUP
+CRT --> PRD
+FAV --> PRD
+ADR --> ORD
+ORD --> OIT
+OIT --> PRD
+ORD ..> MTS
+ORD ..> PCH
+
+@enduml

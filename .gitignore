@@ -1,0 +1,90 @@
+# ==========================
+# Laravel
+# ==========================
+
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/debugbar/*
+
+# Cache
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# PHPUnit
+.phpunit.cache
+.phpunit.result.cache
+coverage/
+
+# Pint
+.pint.cache
+
+# Pest
+.pest.cache
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Composer
+composer.phar
+
+# NPM
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Docker
+docker-compose.override.yml
+
+# Sail
+/.docker
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# Valet
+.valetrc
+
+# Temporary
+*.log
+*.tmp
+*.temp
+*.swp
+*.bak
+
+# SQLite
+database/database.sqlite
+
+# Testing
+/.phpunit.result.cache
+
+# Laravel Herd
+.herd
+
+# Misc
+.auth.json

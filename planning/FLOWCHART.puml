@@ -1,0 +1,365 @@
+@startuml mantri-tani-system-overview
+' Flowchart 1 — Overview sistem (3 role)
+
+title Mantri Tani — Overview Sistem
+
+skinparam activity {
+  BackgroundColor #f0fdf4
+  BorderColor #059669
+  FontColor #1f2937
+}
+skinparam partition {
+  BackgroundColor #ecfdf5
+  BorderColor #059669
+}
+
+|Pelanggan|
+start
+:Onboarding / Beranda;
+:B browse produk & kategori;
+if (Ingin beli?) then (ya)
+  :Tambah ke keranjang;
+  if (Sudah login?) then (belum)
+    :Login / Register;
+  else (sudah)
+  endif
+  :Checkout;
+  :Bayar via Midtrans Snap;
+  :Datang ke toko Selorejo;
+  :Ambil barang + tunjukkan kode TRX;
+else (tidak)
+  stop
+endif
+
+|Admin|
+:Verifikasi kode transaksi;
+:Foto bukti pengambilan;
+if (Valid?) then (ya)
+  :Verifikasi → barang sudah diambil;
+else (tidak)
+  :Tolak pengambilan;
+endif
+
+|Pelanggan|
+:Transaksi selesai;
+stop
+
+@enduml
+
+@startuml mantri-tani-shopping-flow
+' Flowchart 2 — Alur belanja pelanggan
+
+title Alur Belanja Pelanggan (Mobile Store)
+
+start
+
+:Onboarding / Beranda;
+repeat
+  :Lihat produk / filter kategori;
+  :Buka detail produk;
+  if (Tambah keranjang?) then (ya)
+    :Update cart_items;
+  else (tidak)
+  endif
+repeat while (Lanjut belanja?) is (ya) not (tidak)
+
+:Buka keranjang;
+:Pilih item (checkbox);
+:Hitung total;
+
+if (Lanjut checkout?) then (ya)
+  if (Sudah login JWT?) then (belum)
+    :Redirect ke /toko/login;
+    :Login email/HP + password;
+    :Dapat access_token;
+  else (sudah)
+  endif
+  :Checkout;
+else (tidak)
+  stop
+endif
+
+stop
+
+@enduml
+
+@startuml mantri-tani-checkout-payment
+' Flowchart 3 — Checkout & pembayaran Midtrans
+
+title Alur Checkout & Pembayaran Midtrans
+
+|Pelanggan|
+start
+:Pilih alamat pembeli;
+:Isi data pembeli;
+:Review ringkasan order;
+
+|Sistem|
+:Buat record orders\n(payment_status: menunggu_pembayaran);
+:Buat order_items;
+:Request Snap token ke Midtrans;
+:Simpan snap_token;
+
+|Pelanggan|
+:Tampilkan Midtrans Snap;
+:Pilih metode bayar\n(QRIS / VA / GoPay);
+
+|Midtrans|
+if (Pembayaran sukses?) then (settlement)
+  :Kirim notification webhook;
+  |Sistem|
+  :Verifikasi signature;
+  :Update payment_status → lunas;
+  :Update pickup_status → menunggu_approval;
+  :paid_at = now;
+  |Pelanggan|
+  :Redirect finish_url;
+  :Tampilkan kode TRX;
+else (expire / gagal)
+  |Sistem|
+  :Update payment_status → expired;
+  |Pelanggan|
+  :Redirect error/unfinish URL;
+endif
+
+stop
+
+@enduml
+
+@startuml mantri-tani-pickup-approval
+' Flowchart 4 — Approval pengambilan admin
+
+title Alur Approval Pengambilan Barang (Admin)
+
+|Admin|
+start
+:Buka /admin/approval;
+:Masukkan kode TRX;
+
+|Sistem|
+:Cari orders by code;
+if (Ditemukan?) then (tidak)
+  |Admin|
+  :Tampilkan error;
+  stop
+else (ya)
+endif
+
+|Admin|
+:Tampilkan data pembeli & alamat;
+:Cek payment_status = lunas;
+
+if (Status = menunggu_approval?) then (ya)
+  :Pastikan barang sudah diambil pelanggan;
+  :Ambil foto via kamera;
+  if (Verifikasi?) then (ya)
+    |Sistem|
+    :Simpan pickup_proofs;
+    :Update pickup_status → disetujui;
+    :Log activity_logs;
+    |Admin|
+    :Konfirmasi berhasil;
+  else (tolak)
+    |Sistem|
+    :Update pickup_status → ditolak;
+    |Admin|
+    :Catat alasan penolakan;
+  endif
+else (sudah diproses)
+  :Tampilkan bukti yang ada;
+endif
+
+stop
+
+@enduml
+
+@startuml mantri-tani-auth-jwt
+' Flowchart 5 — Autentikasi JWT
+
+title Alur Autentikasi JWT
+
+start
+
+if (Aksi?) then (Register)
+  :POST /api/auth/register;
+  :Validasi name, email/phone, password;
+  :Buat users (role: customer);
+  :Hash password;
+elseif (Login) then
+  :POST /api/auth/login;
+  :Cari user by email atau phone;
+  if (Credential valid?) then (tidak)
+    :Return 401;
+    stop
+  else (ya)
+  endif
+  :Generate access_token (JWT);
+  :Generate refresh_token;
+  :Simpan hash ke refresh_tokens;
+  :Return tokens;
+elseif (Refresh) then
+  :POST /api/auth/refresh;
+  if (Token valid & belum revoked?) then (tidak)
+    :Return 401;
+    stop
+  else (ya)
+  endif
+  :Generate access_token baru;
+  :Return access_token;
+elseif (Logout) then
+  :POST /api/auth/logout;
+  :Set revoked_at pada refresh_token;
+  :Return 200;
+endif
+
+stop
+
+@enduml
+
+@startuml mantri-tani-admin-catalog
+' Flowchart 6 — Admin kelola katalog
+
+title Alur Admin — Kelola Katalog
+
+|Admin|
+start
+
+if (Menu?) then (Kategori)
+  if (Aksi?) then (Tambah)
+    :Form nama, emoji, warna, urutan;
+    :Simpan ke categories;
+  elseif (Edit) then
+    :Update categories;
+  else (Nonaktifkan)
+    :is_active = false;
+  endif
+elseif (Produk) then
+  if (Aksi?) then (Tambah)
+    :Form nama, kategori, harga, stok;
+    :Upload gambar / emoji;
+    :Simpan ke products;
+  elseif (Edit) then
+    :Update products;
+  else (Draft)
+    :status = draft;
+  endif
+endif
+
+:Simpan activity_logs;
+:Tampilkan di dashboard;
+
+stop
+
+@enduml
+
+@startuml mantri-tani-midtrans-webhook
+' Flowchart 7 — Webhook Midtrans
+
+title Alur Webhook Midtrans Notification
+
+start
+
+:POST /api/midtrans/notification;
+:Terima payload JSON;
+
+:Verifikasi SHA512 signature;
+
+if (Signature valid?) then (tidak)
+  :Return 403;
+  stop
+else (ya)
+endif
+
+:Cari orders by midtrans_order_id;
+
+if (Order ditemukan?) then (tidak)
+  :Return 404;
+  stop
+else (ya)
+endif
+
+switch (transaction_status?)
+case ( settlement / capture )
+  :payment_status = lunas;
+  :pickup_status = menunggu_approval;
+  :midtrans_transaction_id = ...;
+  :paid_at = now;
+case ( expire / cancel / deny )
+  :payment_status = expired;
+case ( pending )
+  :payment_status = menunggu_pembayaran;
+endswitch
+
+:Return 200 OK;
+stop
+
+@enduml
+
+@startuml mantri-tani-order-status-flow
+' Flowchart 8 — Decision tree status order
+
+title Decision Tree — Status Order
+
+start
+
+:Order dibuat;
+
+:payment_status = menunggu_pembayaran;
+:pickup_status = null;
+
+if (Midtrans callback?) then (settlement)
+  :payment_status = lunas;
+  :pickup_status = menunggu_approval;
+  if (Admin verifikasi?) then (ya + foto)
+    :pickup_status = disetujui;
+    :pickup_status = selesai;
+  elseif (Admin tolak?) then (ya)
+    :pickup_status = ditolak;
+  else (belum)
+    :Tunggu pelanggan ke toko;
+  endif
+elseif (timeout?) then (ya)
+  :payment_status = expired;
+else (pending)
+  :Tunggu pembayaran;
+endif
+
+stop
+
+@enduml
+
+@startuml mantri-tani-role-access
+' Flowchart 9 — Akses per role
+
+title Akses Fitur per Role
+
+start
+
+:User request halaman/API;
+
+:Decode JWT → role;
+
+switch (role?)
+case ( customer )
+  if (Route toko?) then (ya)
+    :Izinkan;
+  else (admin/owner)
+    :403 Forbidden;
+  endif
+case ( admin )
+  if (Route admin?) then (ya)
+    :Izinkan CRUD + approval + laporan;
+  else (owner only)
+    :403 Forbidden;
+  endif
+case ( owner )
+  if (Route owner/dashboard/laporan?) then (ya)
+    :Izinkan read-only KPI;
+  else
+    :403 Forbidden;
+  endif
+endswitch
+
+stop
+
+@enduml
