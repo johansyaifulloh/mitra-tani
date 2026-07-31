@@ -8,60 +8,12 @@
 </header>
 @endsection
 @section('content')
-<form action="{{ route('toko.checkout.store') }}" method="POST" id="checkout-form">
-@csrf
-<div class="space-y-3">
-
-<section class="panel">
-<p class="panel__label">Pengambilan Barang</p>
-<div class="flex gap-3">
-<div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 text-lg">📍</div>
-<div>
-<p class="text-sm font-semibold text-gray-900">Ambil di Toko Mantri Tani</p>
-<p class="text-xs text-gray-400 mt-0.5">Jl. Selorejo, Malang · 08.00–17.00 · Verifikasi saat pengambilan</p>
+<div class="panel text-center py-10 px-5 my-6">
+<div class="text-5xl mb-3">🛍️</div>
+<h2 class="text-lg font-bold text-gray-900 mb-2">Halaman Checkout</h2>
+<p class="text-xs text-gray-500 leading-relaxed mb-6">Tidak ada item yang siap di-checkout. Silakan pilih produk dari katalog terlebih dahulu.</p>
+<a href="{{ route('home') }}" class="btn-primary inline-block py-2.5 px-6 text-xs font-semibold rounded-xl">Lihat Katalog Produk</a>
 </div>
-</div>
-</section>
-
-<section>
-<div class="flex items-center justify-between mb-3">
-<p class="section-label mb-0">Alamat Pembeli</p>
-<a href="{{ route('toko.alamat.index') }}" class="address-add-link">+ Tambah Alamat</a>
-</div>
-@if($hasAddress)
-<div class="address-list">
-@foreach($addresses as $address)
-@include('components.mobile.address-card', ['address' => $address, 'selected' => $address['default']])
-@endforeach
-</div>
-@else
-<div class="panel text-center py-6">
-<p class="text-sm text-gray-500">Belum ada alamat tersimpan.</p>
-<p class="text-xs text-gray-400 mt-1">Tambahkan alamat terlebih dahulu sebelum checkout.</p>
-<a href="{{ route('toko.alamat.index') }}" class="inline-block mt-3 text-sm font-semibold text-emerald-600">Isi Alamat Sekarang</a>
-</div>
-@endif
-</section>
-
-<section class="panel text-sm space-y-2">
-@foreach($summary['items'] as $item)
-<div class="flex justify-between text-gray-600">
-<span>{{ $item['name'] }} ×{{ $item['quantity'] }}</span>
-<span>{{ $item['subtotal_label'] }}</span>
-</div>
-@endforeach
-<div class="flex justify-between text-gray-600">
-<span>Biaya Admin</span>
-<span>{{ $summary['admin_fee_label'] }}</span>
-</div>
-<div class="flex justify-between font-bold text-emerald-700 border-t border-gray-100 pt-2 mt-2">
-<span>Total</span>
-<span id="checkout-total">{{ $summary['total_label'] }}</span>
-</div>
-</section>
-
-</div>
-</form>
 @endsection
 @section('footer')
 <x-mobile.cart-footer

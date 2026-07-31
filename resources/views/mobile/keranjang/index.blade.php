@@ -9,17 +9,12 @@
 </header>
 @endsection
 @section('content')
-<div class="space-y-3 mb-6" id="cart-list">
-<p class="text-sm text-gray-400 text-center py-8" id="cart-loading">Memuat keranjang...</p>
+<div class="panel text-center py-10 px-5 my-6">
+<div class="text-5xl mb-3">🛒</div>
+<h2 class="text-lg font-bold text-gray-900 mb-2">Keranjang Belanja</h2>
+<p class="text-xs text-gray-500 leading-relaxed mb-6">Keranjang belanja Anda saat ini masih kosong.</p>
+<a href="{{ route('home') }}" class="btn-primary inline-block py-2.5 px-6 text-xs font-semibold rounded-xl">Lihat Katalog Produk</a>
 </div>
-@if(!empty($products))
-<p class="section-label">Baru Dilihat</p>
-<div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-@foreach(array_slice($products, 3, 3) as $product)
-@include('components.mobile.product-card', ['product' => $product, 'sm' => true])
-@endforeach
-</div>
-@endif
 @endsection
 @section('footer')
 <x-mobile.cart-footer

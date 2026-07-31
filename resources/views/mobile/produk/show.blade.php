@@ -31,15 +31,7 @@
 </div></div>
 <p class="text-2xl font-extrabold text-emerald-700 mt-6">{{ $product['price'] }}</p>
 @endsection
-@section('footer')
-<div class="sticky-bar sticky-bar--solo">
-<div class="sticky-bar__inner">
-<button type="button" id="add-to-cart-btn" class="btn-primary flex-1 text-center py-3.5 text-sm" data-product-id="{{ $product['id'] }}">
-Tambah ke Keranjang — {{ $product['price'] }}
-</button>
-</div>
-</div>
-@endsection
+
 
 @push('scripts')
 <script>
