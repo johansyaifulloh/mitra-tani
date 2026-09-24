@@ -80,7 +80,9 @@ class MidtransSettingService
                 'is_active' => ! empty($data['is_active']),
             ]);
 
-            $this->paymentChannelRepository->setEnabledByCodes($data['channels'] ?? []);
+            if (array_key_exists('channels', $data)) {
+                $this->paymentChannelRepository->setEnabledByCodes($data['channels'] ?? []);
+            }
 
             DB::commit();
         } catch (Exception $e) {

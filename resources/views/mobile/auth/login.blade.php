@@ -19,7 +19,7 @@
                     <h1 class="auth-hero__title">Mantri Tani</h1>
                 </div>
             </div>
-            <p class="auth-hero__desc">Belanja pupuk, benih, dan kebutuhan tani dengan mudah — ambil langsung di toko Selorejo.</p>
+            <p class="auth-hero__desc">Belanja pupuk, benih, dan kebutuhan tani dengan mudah — ambil langsung di toko Bagor, Nganjuk.</p>
             <div class="auth-hero__stats">
                 <div class="auth-hero__stat"><strong>500+</strong><span>Petani</span></div>
                 <div class="auth-hero__stat"><strong>120+</strong><span>Produk</span></div>
@@ -81,7 +81,7 @@
                     <input type="checkbox" name="remember">
                     <span>Ingat saya</span>
                 </label>
-                <a href="#" class="auth-link">Lupa password?</a>
+                <a href="{{ route('toko.forgot-password') }}" class="auth-link">Lupa password?</a>
             </div>
 
             <button type="submit" class="auth-submit">

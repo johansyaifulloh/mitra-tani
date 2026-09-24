@@ -18,7 +18,7 @@
 <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 text-lg">📍</div>
 <div>
 <p class="text-sm font-semibold text-gray-900">Ambil di Toko Mantri Tani</p>
-<p class="text-xs text-gray-400 mt-0.5">Jl. Selorejo, Malang · 08.00–17.00 · Verifikasi saat pengambilan</p>
+<p class="text-xs text-gray-400 mt-0.5">Bagor, Nganjuk · 08.00–17.00 · Verifikasi saat pengambilan</p>
 </div>
 </div>
 </section>

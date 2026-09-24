@@ -36,6 +36,8 @@ Route::prefix('toko')->name('toko.')->group(function () {
     Route::post('/logout', [TokoAuthController::class, 'logout'])->name('logout');
     Route::get('/register', [TokoAuthController::class, 'register'])->name('register');
     Route::post('/register', [TokoAuthController::class, 'registerStore'])->name('register.store');
+    Route::get('/lupa-password', [TokoAuthController::class, 'forgotPassword'])->name('forgot-password');
+    Route::post('/lupa-password', [TokoAuthController::class, 'forgotPasswordSubmit'])->name('forgot-password.submit');
 
     Route::middleware('jwt.web')->group(function () {
         Route::get('/alamat', [AlamatController::class, 'index'])->name('alamat.index');
