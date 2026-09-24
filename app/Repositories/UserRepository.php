@@ -37,4 +37,14 @@ class UserRepository
             'updated_at' => now(),
         ]));
     }
+
+    public function updatePassword(int $userId, string $hashedPassword): int
+    {
+        return DB::table('users')
+            ->where('id', $userId)
+            ->update([
+                'password' => $hashedPassword,
+                'updated_at' => now(),
+            ]);
+    }
 }

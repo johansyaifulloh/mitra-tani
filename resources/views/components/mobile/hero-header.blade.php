@@ -6,7 +6,7 @@
 
 <div class="app-header__logo">MT</div>
 
-<div><p class="app-header__title">Mantri Tani</p><p class="app-header__sub">📍 Selorejo, Malang</p></div>
+<div><p class="app-header__title">Mantri Tani</p><p class="app-header__sub">📍 Bagor, Nganjuk</p></div>
 
 </div>
 

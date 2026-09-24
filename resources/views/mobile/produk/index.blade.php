@@ -1,6 +1,14 @@
 @extends('layouts.mobile.home')
 @section('title', 'Beranda | Mantri Tani')
 @section('content')
+<div class="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-5 px-5 py-1 mb-4" id="category-pills">
+    <button type="button" class="category-pill category-pill--active shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-700 text-white transition-all shadow-sm" data-pill-cat="all">Semua</button>
+    @foreach($categories ?? [] as $cat)
+    <button type="button" class="category-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all" data-pill-cat="{{ $cat['id'] }}">
+        {{ $cat['icon'] }} {{ $cat['name'] }}
+    </button>
+    @endforeach
+</div>
 <p class="section-label">Produk Terbaru</p>
 <div class="product-grid" id="produk-grid">
 <div class="product-grid__loading" id="produk-loading">Memuat produk...</div>
@@ -11,11 +19,21 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    var urlParams = new URLSearchParams(window.location.search);
+    var initialCats = urlParams.getAll('categories[]');
+    if (!initialCats.length && urlParams.getAll('categories').length) {
+        initialCats = urlParams.getAll('categories');
+    }
+    if (!initialCats.length && urlParams.get('category')) {
+        initialCats = [urlParams.get('category')];
+    }
+    initialCats = initialCats.map(function (id) { return String(id); });
+
     var state = {
         page: 1,
         search: '',
-        categoryIds: [],
-        draftCategoryIds: [],
+        categoryIds: initialCats,
+        draftCategoryIds: initialCats.slice(),
         perPage: 8,
         loading: false,
     };
@@ -104,7 +122,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function syncCategoryPills() {
+        var pills = document.querySelectorAll('#category-pills [data-pill-cat]');
+        pills.forEach(function (pill) {
+            var catId = pill.dataset.pillCat;
+            var isActive = (catId === 'all' && state.categoryIds.length === 0) || (state.categoryIds.indexOf(catId) !== -1 && state.categoryIds.length === 1);
+            if (isActive) {
+                pill.className = 'category-pill category-pill--active shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-700 text-white transition-all shadow-sm';
+            } else {
+                pill.className = 'category-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all';
+            }
+        });
+    }
+
     function renderActiveFilters() {
+        syncCategoryPills();
         if (!state.categoryIds.length) {
             activeFiltersEl.hidden = true;
             activeFiltersEl.innerHTML = '';
@@ -255,6 +287,21 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 state.draftCategoryIds = state.draftCategoryIds.filter(function (item) { return item !== value; });
             }
+        });
+    });
+
+    document.querySelectorAll('#category-pills [data-pill-cat]').forEach(function (pill) {
+        pill.addEventListener('click', function () {
+            var catId = pill.dataset.pillCat;
+            if (catId === 'all') {
+                state.categoryIds = [];
+            } else {
+                state.categoryIds = [catId];
+            }
+            state.draftCategoryIds = state.categoryIds.slice();
+            syncDraftCheckboxes();
+            renderActiveFilters();
+            loadProducts(false);
         });
     });
 

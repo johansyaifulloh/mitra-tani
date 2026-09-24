@@ -8,9 +8,9 @@
 @endsection
 @section('content')
 <div class="grid grid-cols-2 gap-3 mb-6">
-@foreach([['🌱','Pupuk',18],['🌾','Benih',12],['💊','Obat',10],['🔧','Alat Tani',8]] as $i => [$icon,$name,$count])
-<a href="{{ route('toko.produk.index') }}" class="panel p-5 text-center card-hover animate-card-in" style="animation-delay:{{ ($i+1)*0.05 }}s">
-<span class="text-4xl">{{ $icon }}</span><p class="font-bold mt-2 text-gray-900">{{ $name }}</p><p class="text-xs text-gray-400">{{ $count }} produk</p></a>
+@foreach($categories as $i => $cat)
+<a href="{{ route('toko.produk.index', ['categories' => [$cat['id']]]) }}" class="panel p-5 text-center card-hover animate-card-in" style="animation-delay:{{ ($i+1)*0.05 }}s">
+<span class="text-4xl">{{ $cat['icon'] }}</span><p class="font-bold mt-2 text-gray-900">{{ $cat['name'] }}</p><p class="text-xs text-gray-400">{{ $cat['count'] }} produk</p></a>
 @endforeach
 </div>
 <p class="section-label">Populer</p>

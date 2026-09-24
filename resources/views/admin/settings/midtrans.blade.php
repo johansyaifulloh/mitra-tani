@@ -90,59 +90,6 @@
 </div>
 </div>
 </div>
-
-@php
-$channels = collect($settings['channels']);
-$activeCount = $channels->where('enabled', true)->count();
-$totalCount = $channels->count();
-@endphp
-
-<div class="panel-card panel-card-hover panel-card--mt">
-<div class="panel-card__head">
-<div>
-<h3 class="panel-card__title">Metode Pembayaran</h3>
-<span class="panel-card__meta">Channel Midtrans yang ditampilkan di Snap checkout</span>
-</div>
-<span class="panel-badge panel-badge--info" id="channel-summary">{{ $activeCount }}/{{ $totalCount }} aktif</span>
-</div>
-<div class="panel-card__body">
-<div class="panel-pay-toolbar">
-<p class="panel-pay-toolbar__hint">Aktifkan metode bayar yang ingin ditampilkan saat checkout pelanggan.</p>
-<button type="button" class="panel-pay-toolbar__btn" id="toggle-all-channels">Aktifkan Semua</button>
-</div>
-
-@foreach($settings['channel_groups'] as $groupKey => $group)
-@php
-$groupChannels = $channels->where('group', $groupKey);
-$groupActive = $groupChannels->where('enabled', true)->count();
-@endphp
-<div class="panel-pay-group">
-<div class="panel-pay-group__head">
-<div class="panel-pay-group__title-wrap">
-<span class="panel-pay-group__dot panel-pay-group__dot--{{ $groupKey }}"></span>
-<div>
-<h4 class="panel-pay-group__title">{{ $group['label'] }}</h4>
-<p class="panel-pay-group__desc">{{ $group['desc'] }}</p>
-</div>
-</div>
-<span class="panel-pay-group__count">{{ $groupActive }}/{{ $groupChannels->count() }}</span>
-</div>
-<div class="panel-pay-grid">
-@foreach($groupChannels as $channel)
-<label class="panel-pay-card {{ $channel['enabled'] ? 'panel-pay-card--on' : '' }}" data-group="{{ $groupKey }}">
-<input type="checkbox" class="panel-pay-card__input" name="channels[]" value="{{ $channel['code'] }}" {{ $channel['enabled'] ? 'checked' : '' }}>
-<span class="panel-pay-card__icon" style="--pay-color: {{ $channel['color'] }}">{{ $channel['icon'] }}</span>
-<div class="panel-pay-card__body">
-<span class="panel-pay-card__name">{{ $channel['name'] }}</span>
-<span class="panel-pay-card__code">{{ $channel['code'] }}</span>
-</div>
-<span class="panel-pay-card__toggle" aria-hidden="true"></span>
-</label>
-@endforeach
-</div>
-</div>
-@endforeach
-</div>
 </div>
 
 <div class="panel-form__actions panel-form__actions--left panel-form__actions--mt">
@@ -160,36 +107,6 @@ function toggleSecret(id) {
     const input = document.getElementById(id);
     input.type = input.type === 'password' ? 'text' : 'password';
 }
-function updateChannelSummary() {
-    const all = document.querySelectorAll('.panel-pay-card__input');
-    const active = [...all].filter(function (cb) { return cb.checked; }).length;
-    document.getElementById('channel-summary').textContent = active + '/' + all.length + ' aktif';
-    document.querySelectorAll('.panel-pay-group').forEach(function (group) {
-        const cards = group.querySelectorAll('.panel-pay-card__input');
-        const on = [...cards].filter(function (cb) { return cb.checked; }).length;
-        group.querySelector('.panel-pay-group__count').textContent = on + '/' + cards.length;
-    });
-    const btn = document.getElementById('toggle-all-channels');
-    btn.textContent = active === all.length ? 'Nonaktifkan Semua' : 'Aktifkan Semua';
-}
-// Label sudah otomatis toggle checkbox-nya (perilaku bawaan browser).
-// Cukup dengarkan event change untuk update tampilan + ringkasan.
-document.querySelectorAll('.panel-pay-card').forEach(function (card) {
-    card.querySelector('.panel-pay-card__input').addEventListener('change', function () {
-        card.classList.toggle('panel-pay-card--on', this.checked);
-        updateChannelSummary();
-    });
-});
-document.getElementById('toggle-all-channels').addEventListener('click', function () {
-    const all = document.querySelectorAll('.panel-pay-card__input');
-    const turnOn = [...all].some(function (cb) { return !cb.checked; });
-    all.forEach(function (cb) {
-        cb.checked = turnOn;
-        cb.closest('.panel-pay-card').classList.toggle('panel-pay-card--on', turnOn);
-    });
-    updateChannelSummary();
-});
-updateChannelSummary();
 </script>
 @endpush
 

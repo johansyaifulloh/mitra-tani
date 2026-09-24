@@ -92,6 +92,8 @@ class OrderService
                     'quantity' => $item->quantity,
                     'subtotal' => $item->price * $item->quantity,
                 ]);
+
+                $this->productRepository->decrementStock($item->product_id, $item->quantity);
             }
 
             $this->cartRepository->clearForUser($userId);
@@ -300,7 +302,10 @@ class OrderService
                 $update['paid_at'] = now();
             }
         } elseif (in_array($transactionStatus, ['expire', 'cancel', 'deny'], true)) {
-            $update['payment_status'] = 'expired';
+            if ($order->payment_status !== 'expired') {
+                $update['payment_status'] = 'expired';
+                $this->restoreStockForOrder($order->id);
+            }
         }
 
         if ($update) {
@@ -342,11 +347,22 @@ class OrderService
                 'payment_method' => $paymentMethod,
             ];
         } elseif (in_array($status, ['expire', 'cancel', 'deny'], true)) {
-            $update = ['payment_status' => 'expired'];
+            if ($order->payment_status !== 'expired') {
+                $update = ['payment_status' => 'expired'];
+                $this->restoreStockForOrder($order->id);
+            }
         }
 
         if ($update) {
             $this->orderRepository->update($order->id, $update);
+        }
+    }
+
+    private function restoreStockForOrder(int $orderId): void
+    {
+        $items = $this->orderItemRepository->listForOrder($orderId);
+        foreach ($items as $item) {
+            $this->productRepository->incrementStock($item->product_id, (int) $item->quantity);
         }
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Toko;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Services\AuthService;
@@ -125,6 +126,26 @@ class AuthController extends Controller
         $response = redirect()->route('home')->with('success', 'Akun berhasil dibuat.');
 
         return JwtCookie::attach($response, $tokens['access_token'], $tokens['refresh_token']);
+    }
+
+    public function forgotPassword()
+    {
+        return view('mobile.auth.forgot-password');
+    }
+
+    public function forgotPasswordSubmit(ForgotPasswordRequest $request)
+    {
+        $data = $request->validated();
+
+        try {
+            $this->authService->resetPassword($data['identifier'], $data['password']);
+        } catch (Exception $e) {
+            return back()->withInput()->withErrors(['identifier' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('toko.login')
+            ->with('success', 'Password berhasil diperbarui. Silakan masuk dengan password baru Anda.');
     }
 
     private function redirectAfterLogin(Request $request)

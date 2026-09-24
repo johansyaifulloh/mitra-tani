@@ -112,4 +112,18 @@ class ProductRepository
     {
         return $this->update($id, ['status' => 'draft']);
     }
+
+    public function decrementStock(int $id, int $quantity): int
+    {
+        return DB::table('products')
+            ->where('id', $id)
+            ->decrement('stock', $quantity);
+    }
+
+    public function incrementStock(int $id, int $quantity): int
+    {
+        return DB::table('products')
+            ->where('id', $id)
+            ->increment('stock', $quantity);
+    }
 }

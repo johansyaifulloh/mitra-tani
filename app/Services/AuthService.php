@@ -109,6 +109,20 @@ class AuthService
         return $this->userRepository->findById($userId);
     }
 
+    public function resetPassword(string $identifier, string $newPassword): void
+    {
+        // STEP 1: Get DB reference
+        $userRow = $this->userRepository->findByIdentifier($identifier);
+
+        // STEP 2: Validate DB results
+        if (! $userRow) {
+            throw new Exception('Akun dengan Email / No. Handphone tersebut tidak ditemukan.');
+        }
+
+        // STEP 3: Business logic — update password
+        $this->userRepository->updatePassword($userRow->id, Hash::make($newPassword));
+    }
+
     private function issueTokens(object $userRow): array
     {
         $user = User::query()->find($userRow->id);
