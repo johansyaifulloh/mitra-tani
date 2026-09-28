@@ -17,7 +17,7 @@ class CategoryService
     public function listForStore(): array
     {
         // STEP 1: Get DB reference
-        $rows = $this->categoryRepository->allActive();
+        $rows = $this->categoryRepository->allActiveWithProductCount();
 
         // STEP 2: Validate — empty is ok for store
         return $rows->map(fn ($row) => FormatHelper::categoryForView($row))->all();

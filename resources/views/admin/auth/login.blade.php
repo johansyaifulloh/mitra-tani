@@ -121,6 +121,11 @@
 <a href="#" class="panel-login-link">Lupa password?</a>
 </div>
 
+<div style="display:flex;gap:8px;margin-bottom:12px;">
+<button type="button" onclick="fillAdmin()" style="flex:1;padding:8px 10px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#047857;font-size:12px;font-weight:600;cursor:pointer;">👤 Akun Admin</button>
+<button type="button" onclick="fillOwner()" style="flex:1;padding:8px 10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;color:#1e293b;font-size:12px;font-weight:600;cursor:pointer;">👑 Akun Owner</button>
+</div>
+
 <button type="submit" class="panel-login-submit" id="login-btn">
 <span class="panel-login-submit__text">Masuk Dashboard</span>
 <span class="panel-login-submit__icon">
@@ -147,6 +152,14 @@ Sesi admin terenkripsi & dilindungi
 </div>
 
 <script>
+function fillAdmin() {
+    document.getElementById('admin-user').value = 'admin@mantri-tani.test';
+    document.getElementById('admin-pass').value = 'password';
+}
+function fillOwner() {
+    document.getElementById('admin-user').value = 'owner@mantri-tani.test';
+    document.getElementById('admin-pass').value = 'password';
+}
 (function () {
     var pass = document.getElementById('admin-pass');
     document.getElementById('toggle-pass').addEventListener('click', function () {

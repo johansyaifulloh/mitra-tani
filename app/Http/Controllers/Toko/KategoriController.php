@@ -15,10 +15,8 @@ class KategoriController extends Controller
 
     public function index()
     {
-        $categories = $this->categoryService->listForStore();
-
         return view('mobile.kategori.index', [
-            'categories' => $categories,
+            'categories' => $this->categoryService->listForStore(),
             'products' => $this->productService->listActive(),
         ]);
     }

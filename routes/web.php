@@ -22,6 +22,7 @@ use App\Http\Controllers\Owner\LaporanController as OwnerLaporanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ProdukController::class, 'index'])->name('home');
+Route::get('/hub', fn () => view('welcome'))->name('hub');
 Route::get('/toko/produk', [ProdukController::class, 'index'])->name('toko.produk.index');
 Route::get('/toko/produk/data', [ProdukController::class, 'fetchData'])->name('toko.produk.data');
 

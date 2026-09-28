@@ -26,7 +26,7 @@
 <a href="{{ route('toko.produk.show', 'pupuk-urea-50kg') }}" class="p-4 bg-white rounded-2xl border card-hover text-center text-sm">Detail Produk</a>
 <a href="{{ route('toko.keranjang.index') }}" class="p-4 bg-white rounded-2xl border card-hover text-center text-sm">Keranjang</a>
 <a href="{{ route('toko.checkout.index') }}" class="p-4 bg-white rounded-2xl border card-hover text-center text-sm">Checkout</a>
-<a href="{{ route('toko.pembayaran.index') }}" class="p-4 bg-white rounded-2xl border card-hover text-center text-sm">Midtrans</a>
+<a href="{{ route('admin.settings.midtrans') }}" class="p-4 bg-white rounded-2xl border card-hover text-center text-sm">Pengaturan Midtrans</a>
 <a href="{{ route('toko.profil.index') }}" class="p-4 bg-white rounded-2xl border card-hover text-center text-sm">Profil</a>
 <a href="{{ route('toko.login') }}" class="p-4 bg-white rounded-2xl border card-hover text-center text-sm">Login</a>
 </div></section>

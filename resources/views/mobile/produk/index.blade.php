@@ -9,7 +9,7 @@
     </button>
     @endforeach
 </div>
-<p class="section-label">Produk Terbaru</p>
+<p class="section-label" id="catalog-section-label">Semua Produk</p>
 <div class="product-grid" id="produk-grid">
 <div class="product-grid__loading" id="produk-loading">Memuat produk...</div>
 </div>
@@ -20,14 +20,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var urlParams = new URLSearchParams(window.location.search);
-    var initialCats = urlParams.getAll('categories[]');
-    if (!initialCats.length && urlParams.getAll('categories').length) {
-        initialCats = urlParams.getAll('categories');
-    }
-    if (!initialCats.length && urlParams.get('category')) {
-        initialCats = [urlParams.get('category')];
-    }
-    initialCats = initialCats.map(function (id) { return String(id); });
+    var initialCats = [];
+    urlParams.forEach(function (value, key) {
+        if (key === 'category' || key === 'category_id' || key === 'categories' || key.indexOf('categories') === 0) {
+            if (value && initialCats.indexOf(String(value)) === -1) {
+                initialCats.push(String(value));
+            }
+        }
+    });
 
     var state = {
         page: 1,
@@ -81,7 +81,10 @@ document.addEventListener('DOMContentLoaded', function () {
             + '<p class="product-card__sold">' + escapeHtml(product.sold_label || '0 terjual') + '</p>'
             + '<div class="product-card__footer">'
             + '<span class="product-card__price">' + escapeHtml(product.price) + '</span>'
-            + '<span class="text-[11px] font-semibold text-emerald-600">Lihat →</span>'
+            + '<button type="button" class="product-card__buy" data-cart-add data-product-id="' + product.id + '" aria-label="Beli langsung">'
+            + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>'
+            + 'Beli'
+            + '</button>'
             + '</div>'
             + '</div>'
             + '</a>';
@@ -137,7 +140,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function renderActiveFilters() {
         syncCategoryPills();
+        var sectionLabel = document.getElementById('catalog-section-label');
         if (!state.categoryIds.length) {
+            if (sectionLabel) sectionLabel.textContent = 'Semua Produk';
             activeFiltersEl.hidden = true;
             activeFiltersEl.innerHTML = '';
             filterBadge.hidden = true;
@@ -145,17 +150,24 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        var activeLabels = [];
         filterBadge.hidden = false;
         filterBadge.textContent = state.categoryIds.length;
         filterTrigger.classList.add('search-bar__filter--active');
         activeFiltersEl.hidden = false;
         activeFiltersEl.innerHTML = state.categoryIds.map(function (id) {
             var input = filterSheet.querySelector('[data-filter-cat][value="' + id + '"]');
-            var label = input ? input.dataset.label : 'Kategori';
+            var pill = document.querySelector('#category-pills [data-pill-cat="' + id + '"]');
+            var label = input ? input.dataset.label : (pill ? pill.textContent.trim() : 'Kategori');
+            activeLabels.push(label.trim());
             return '<button type="button" class="store-active-filters__tag" data-remove-cat="' + escapeHtml(id) + '">'
                 + escapeHtml(label)
                 + '<span aria-hidden="true">&times;</span></button>';
         }).join('');
+
+        if (sectionLabel && activeLabels.length) {
+            sectionLabel.textContent = 'Kategori: ' + activeLabels.join(', ');
+        }
 
         activeFiltersEl.querySelectorAll('[data-remove-cat]').forEach(function (btn) {
             btn.addEventListener('click', function () {

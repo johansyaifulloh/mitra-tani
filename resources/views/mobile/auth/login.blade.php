@@ -84,6 +84,10 @@
                 <a href="{{ route('toko.forgot-password') }}" class="auth-link">Lupa password?</a>
             </div>
 
+            <div style="margin-bottom: 12px;">
+                <button type="button" onclick="fillCustomer()" style="width:100%;padding:8px 12px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#047857;font-size:12px;font-weight:600;cursor:pointer;">👤 Isi Cepat Akun Demo (Andi - Pelanggan)</button>
+            </div>
+
             <button type="submit" class="auth-submit">
                 <span>Masuk Sekarang</span>
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
@@ -103,6 +107,10 @@
 </div>
 
 <script>
+function fillCustomer() {
+    document.getElementById('identifier').value = 'andi@example.com';
+    document.getElementById('password').value = 'password';
+}
 function togglePassword() {
     const input = document.getElementById('password');
     input.type = input.type === 'password' ? 'text' : 'password';
