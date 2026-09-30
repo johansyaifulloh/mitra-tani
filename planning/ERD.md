@@ -146,13 +146,6 @@ erDiagram
         boolean is_enabled
     }
 
-    favorites {
-        bigint id PK
-        bigint user_id FK
-        bigint product_id FK
-        timestamps created_at
-    }
-
     activity_logs {
         bigint id PK
         bigint user_id FK
@@ -167,7 +160,6 @@ erDiagram
     users ||--o{ addresses : memiliki
     users ||--o{ cart_items : memiliki
     users ||--o{ orders : memesan
-    users ||--o{ favorites : menyimpan
     users ||--o{ activity_logs : melakukan
     users ||--o{ pickup_proofs : memverifikasi
 
@@ -175,7 +167,6 @@ erDiagram
 
     products ||--o{ cart_items : ada_di
     products ||--o{ order_items : dipesan
-    products ||--o{ favorites : difavoritkan
 
     addresses ||--o{ orders : digunakan
 

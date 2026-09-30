@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\LaporanService;
-use App\Support\FormatHelper;
-use App\Support\SampleData;
 
 class LaporanController extends Controller
 {
@@ -18,17 +16,21 @@ class LaporanController extends Controller
         $dateFrom = request('date_from');
         $dateTo = request('date_to');
 
-        $paginator = $this->laporanService->paginate($dateFrom, $dateTo, 10);
-        $transactions = $paginator->through(function ($row) {
-            $item = FormatHelper::orderForAdmin($row);
-            $item['status'] = $row->pickup_status ?? $row->payment_status;
-            $item['status_label'] = SampleData::statusLabel($item['status']);
-
-            return $item;
-        });
-
+        $transactions = $this->laporanService->paginateTransactions($dateFrom, $dateTo, 10);
         $summary = $this->laporanService->summary($dateFrom, $dateTo);
 
         return view('admin.laporan.index', compact('transactions', 'summary', 'dateFrom', 'dateTo'));
+    }
+
+    public function exportPdf()
+    {
+        $dateFrom = request('date_from');
+        $dateTo = request('date_to');
+
+        $data = $this->laporanService->exportData($dateFrom, $dateTo);
+        $data['userRole'] = 'Admin';
+        $data['userName'] = auth('api')->user()?->name ?? 'Admin Mantri Tani';
+
+        return view('admin.laporan.pdf', $data);
     }
 }

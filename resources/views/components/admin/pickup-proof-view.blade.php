@@ -7,8 +7,8 @@
 </div>
 <div class="panel-proof-view__photo">
 @if(!empty($proof['photo']))
-<a href="{{ $proof['photo'] }}" target="_blank" rel="noopener">
-<img src="{{ $proof['photo'] }}" alt="Foto bukti pengambilan {{ $transactionId }}" style="width:100%;border-radius:12px;object-fit:cover;max-height:320px;display:block;">
+<a href="{{ $proof['photo'] }}" target="_blank" rel="noopener" class="panel-proof-view__link" title="Klik untuk melihat ukuran penuh">
+<img src="{{ $proof['photo'] }}" alt="Foto bukti pengambilan {{ $transactionId }}" style="width:100%;border-radius:12px;object-fit:cover;max-height:320px;display:block;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'panel-proof-view__mock\'><div class=\'panel-proof-view__mock-inner\'><span class=\'panel-proof-view__mock-icon\'>📦</span><p class=\'panel-proof-view__mock-label\'>Foto Bukti Pengambilan</p><p class=\'panel-proof-view__mock-id\'>#{{ $transactionId }}</p></div></div>';">
 </a>
 @else
 <div class="panel-proof-view__mock" aria-label="Foto bukti pengambilan {{ $transactionId }}">

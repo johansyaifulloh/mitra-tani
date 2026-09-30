@@ -71,7 +71,7 @@ class AuthController extends Controller
         $response = $this->redirectAfterLogin($request)
             ->with('success', 'Login berhasil.');
 
-        return JwtCookie::attach($response, $tokens['access_token'], $tokens['refresh_token']);
+        return JwtCookie::attach($response, $tokens['access_token'], $tokens['refresh_token'], $request->boolean('remember'));
     }
 
     public function logout(Request $request)

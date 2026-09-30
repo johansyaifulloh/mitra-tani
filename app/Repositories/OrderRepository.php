@@ -46,6 +46,27 @@ class OrderRepository
         return $query->paginate($perPage);
     }
 
+    public function getAllFiltered(?string $dateFrom, ?string $dateTo): Collection
+    {
+        $query = DB::table('orders')
+            ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
+            ->select(
+                'orders.*',
+                DB::raw("CONCAT(addresses.street, ', ', addresses.district) as address_text"),
+            )
+            ->orderByDesc('orders.created_at');
+
+        if ($dateFrom) {
+            $query->whereDate('orders.created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('orders.created_at', '<=', $dateTo);
+        }
+
+        return $query->get();
+    }
+
     public function listForUser(int $userId, ?string $paymentStatus = null): Collection
     {
         $query = DB::table('orders')
@@ -69,7 +90,23 @@ class OrderRepository
             ->orderByDesc('orders.created_at');
 
         if ($paymentStatus) {
-            $query->where('orders.payment_status', $paymentStatus);
+            if ($paymentStatus === 'selesai') {
+                $query->where('orders.payment_status', 'lunas')
+                    ->whereIn('orders.pickup_status', ['disetujui', 'selesai']);
+            } elseif ($paymentStatus === 'lunas') {
+                $query->where('orders.payment_status', 'lunas')
+                    ->where(function ($q) {
+                        $q->whereNull('orders.pickup_status')
+                            ->orWhere('orders.pickup_status', 'menunggu_approval');
+                    });
+            } elseif ($paymentStatus === 'expired') {
+                $query->where(function ($q) {
+                    $q->where('orders.payment_status', 'expired')
+                        ->orWhere('orders.pickup_status', 'ditolak');
+                });
+            } else {
+                $query->where('orders.payment_status', $paymentStatus);
+            }
         }
 
         return $query->get();
@@ -83,6 +120,48 @@ class OrderRepository
             ->groupBy('payment_status')
             ->pluck('total', 'payment_status')
             ->all();
+    }
+
+    public function getOrderCountsForUser(int $userId): array
+    {
+        $unpaid = DB::table('orders')
+            ->where('user_id', $userId)
+            ->where('payment_status', 'menunggu_pembayaran')
+            ->count();
+
+        $readyPickup = DB::table('orders')
+            ->where('user_id', $userId)
+            ->where('payment_status', 'lunas')
+            ->where(function ($q) {
+                $q->whereNull('pickup_status')->orWhere('pickup_status', 'menunggu_approval');
+            })
+            ->count();
+
+        $completed = DB::table('orders')
+            ->where('user_id', $userId)
+            ->where('payment_status', 'lunas')
+            ->whereIn('pickup_status', ['disetujui', 'selesai'])
+            ->count();
+
+        $cancelled = DB::table('orders')
+            ->where('user_id', $userId)
+            ->where(function ($q) {
+                $q->where('payment_status', 'expired')->orWhere('pickup_status', 'ditolak');
+            })
+            ->count();
+
+        $total = DB::table('orders')
+            ->where('user_id', $userId)
+            ->count();
+
+        return [
+            'unpaid' => $unpaid,
+            'ready_pickup' => $readyPickup,
+            'completed' => $completed,
+            'cancelled' => $cancelled,
+            'total' => $total,
+            'active' => $unpaid + $readyPickup,
+        ];
     }
 
     public function findByCode(string $code): ?object
@@ -181,5 +260,14 @@ class OrderRepository
             ->whereIn('orders.pickup_status', ['menunggu_approval', 'disetujui'])
             ->orderByDesc('orders.created_at')
             ->paginate($perPage);
+    }
+
+    public function getOverduePendingOrders(): Collection
+    {
+        return DB::table('orders')
+            ->where('payment_status', 'menunggu_pembayaran')
+            ->whereNotNull('expired_at')
+            ->where('expired_at', '<', now())
+            ->get();
     }
 }

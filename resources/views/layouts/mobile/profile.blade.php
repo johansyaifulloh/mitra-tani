@@ -3,7 +3,7 @@
 <head>@include('layouts.partials.head')</head>
 <body class="app-shell">
 <div class="app-frame flex flex-col min-h-screen">
-@include('components.mobile.profile-hero', ['user' => $user ?? null])
+@include('components.mobile.profile-hero', ['user' => $user ?? null, 'orderCounts' => $orderCounts ?? []])
 <main class="flex-1 px-5 py-4 pb-[72px] animate-fade-up">
 @yield('content')
 </main>

@@ -114,16 +114,10 @@
 
 <div class="panel-login-form__extras">
 <label class="panel-login-check">
-<input type="checkbox" checked>
+<input type="checkbox" name="remember" value="1" checked>
 <span class="panel-login-check__box"></span>
 <span>Ingat sesi login</span>
 </label>
-<a href="#" class="panel-login-link">Lupa password?</a>
-</div>
-
-<div style="display:flex;gap:8px;margin-bottom:12px;">
-<button type="button" onclick="fillAdmin()" style="flex:1;padding:8px 10px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#047857;font-size:12px;font-weight:600;cursor:pointer;">👤 Akun Admin</button>
-<button type="button" onclick="fillOwner()" style="flex:1;padding:8px 10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;color:#1e293b;font-size:12px;font-weight:600;cursor:pointer;">👑 Akun Owner</button>
 </div>
 
 <button type="submit" class="panel-login-submit" id="login-btn">
@@ -152,14 +146,6 @@ Sesi admin terenkripsi & dilindungi
 </div>
 
 <script>
-function fillAdmin() {
-    document.getElementById('admin-user').value = 'admin@mantri-tani.test';
-    document.getElementById('admin-pass').value = 'password';
-}
-function fillOwner() {
-    document.getElementById('admin-user').value = 'owner@mantri-tani.test';
-    document.getElementById('admin-pass').value = 'password';
-}
 (function () {
     var pass = document.getElementById('admin-pass');
     document.getElementById('toggle-pass').addEventListener('click', function () {

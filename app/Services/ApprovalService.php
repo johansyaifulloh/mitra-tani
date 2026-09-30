@@ -50,6 +50,21 @@ class ApprovalService
         // STEP 3: Business logic — store photo
         $path = $photo->store('pickup-proofs', 'public');
 
+        // Mirror ke public/storage untuk kompatibilitas direct web server
+        try {
+            $destDir = public_path('storage/pickup-proofs');
+            if (! is_dir($destDir)) {
+                @mkdir($destDir, 0755, true);
+            }
+            $sourceFile = storage_path('app/public/'.$path);
+            $destFile = public_path('storage/'.$path);
+            if (file_exists($sourceFile)) {
+                @copy($sourceFile, $destFile);
+            }
+        } catch (\Throwable $th) {
+            Log::warning('Mirror proof photo failed', ['error' => $th->getMessage()]);
+        }
+
         // STEP 4: DB transaction
         DB::beginTransaction();
 

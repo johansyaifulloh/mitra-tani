@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
             | Request::HEADER_X_FORWARDED_PROTO
             | Request::HEADER_X_FORWARDED_AWS_ELB);
 
+        // Otomatis batalkan pesanan kadaluarsa di background saat server berjalan
+        $middleware->web(append: [
+            \App\Http\Middleware\AutoExpireOrdersMiddleware::class,
+        ]);
+
         $middleware->alias([
             'jwt.auth' => \App\Http\Middleware\JwtAuthenticate::class,
             'jwt.web' => \App\Http\Middleware\JwtWebAuthenticate::class,

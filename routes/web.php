@@ -16,10 +16,68 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KategoriController as AdminKategoriController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
-use App\Http\Controllers\Admin\MidtransSettingsController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 use App\Http\Controllers\Owner\LaporanController as OwnerLaporanController;
+use App\Http\Controllers\Owner\MidtransSettingsController as OwnerMidtransSettingsController;
+use App\Http\Controllers\Owner\UserController as OwnerUserController;
 use Illuminate\Support\Facades\Route;
+
+// Route khusus untuk melayani foto bukti pengambilan asli secara langsung & andal
+Route::get('/bukti-foto/{filename}', function (string $filename) {
+    $clean = basename($filename);
+    $paths = [
+        storage_path('app/public/pickup-proofs/'.$clean),
+        storage_path('app/public/'.$clean),
+        public_path('storage/pickup-proofs/'.$clean),
+        public_path('pickup-proofs/'.$clean),
+    ];
+
+    foreach ($paths as $filePath) {
+        if (file_exists($filePath) && ! is_dir($filePath)) {
+            // Mirror ke public/storage jika belum ada
+            $publicTarget = public_path('storage/pickup-proofs/'.$clean);
+            if (! file_exists($publicTarget)) {
+                $dir = dirname($publicTarget);
+                if (! is_dir($dir)) {
+                    @mkdir($dir, 0755, true);
+                }
+                @copy($filePath, $publicTarget);
+            }
+
+            $mime = mime_content_type($filePath) ?: 'image/jpeg';
+
+            return response()->file($filePath, [
+                'Content-Type' => $mime,
+                'Cache-Control' => 'no-cache, private',
+            ]);
+        }
+    }
+
+    // Fallback elegan jika file fisik memang belum pernah diupload / dummy sample seeder
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360" viewBox="0 0 600 360" fill="#f8fafc">'
+        .'<rect width="100%" height="100%" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>'
+        .'<circle cx="300" cy="150" r="45" fill="#ecfdf5"/>'
+        .'<path d="M285 150 L295 160 L318 137" stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+        .'<text x="300" y="225" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#0f172a">Foto Bukti Pengambilan</text>'
+        .'<text x="300" y="252" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#64748b">Mitra Tani Selorejo</text>'
+        .'</svg>';
+
+    return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
+})->name('bukti-foto');
+
+// Route untuk melayani file storage publik lainnya
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/'.$path);
+    if (file_exists($fullPath) && ! is_dir($fullPath)) {
+        return response()->file($fullPath);
+    }
+
+    if (str_starts_with($path, 'pickup-proofs/')) {
+        return redirect()->route('bukti-foto', ['filename' => basename($path)]);
+    }
+
+    abort(404);
+})->where('path', '.*')->name('storage.file');
 
 Route::get('/', [ProdukController::class, 'index'])->name('home');
 Route::get('/hub', fn () => view('welcome'))->name('hub');
@@ -64,6 +122,7 @@ Route::prefix('toko')->name('toko.')->group(function () {
     });
 });
 
+// Panel Admin (Operasional: Produk, Kategori, Approval, Laporan)
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'login'])->name('login');
     Route::post('/login', [AdminAuthController::class, 'loginSubmit'])->name('login.submit');
@@ -95,14 +154,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/approval/reject', [ApprovalController::class, 'reject'])->name('approval.reject');
 
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-
-        Route::get('/pengaturan/midtrans', [MidtransSettingsController::class, 'index'])->name('settings.midtrans');
-        Route::post('/pengaturan/midtrans', [MidtransSettingsController::class, 'update'])->name('settings.midtrans.update');
-        Route::post('/pengaturan/midtrans/test', [MidtransSettingsController::class, 'testConnection'])->name('settings.midtrans.test');
+        Route::get('/laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.pdf');
     });
 });
 
+// Panel Owner (Full Akses: Dashboard Bisnis, Manajemen Akun Admin/Owner, Midtrans Settings, Laporan)
 Route::prefix('owner')->name('owner.')->middleware(['jwt.web:admin', 'role:owner'])->group(function () {
     Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/laporan', [OwnerLaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/pdf', [OwnerLaporanController::class, 'exportPdf'])->name('laporan.pdf');
+
+    // Manajemen Akun Admin & Owner
+    Route::get('/users', [OwnerUserController::class, 'index'])->name('users.index');
+    Route::get('/users/tambah', [OwnerUserController::class, 'create'])->name('users.create');
+    Route::post('/users', [OwnerUserController::class, 'store'])->name('users.store');
+    Route::get('/users/{id}/edit', [OwnerUserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{id}', [OwnerUserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}', [OwnerUserController::class, 'destroy'])->name('users.destroy');
+
+    // Pengaturan Midtrans Payment Gateway
+    Route::get('/pengaturan/midtrans', [OwnerMidtransSettingsController::class, 'index'])->name('settings.midtrans');
+    Route::post('/pengaturan/midtrans', [OwnerMidtransSettingsController::class, 'update'])->name('settings.midtrans.update');
+    Route::post('/pengaturan/midtrans/test', [OwnerMidtransSettingsController::class, 'testConnection'])->name('settings.midtrans.test');
 });

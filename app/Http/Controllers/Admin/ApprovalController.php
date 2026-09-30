@@ -31,6 +31,7 @@ class ApprovalController extends Controller
                     'verified_at' => date('d/m/Y H:i', strtotime($proof->verified_at)),
                     'verified_by' => $proof->verified_by_name,
                     'note' => $proof->note ?? '',
+                    'photo' => FormatHelper::proofPhotoUrl($proof->photo_path),
                 ];
             }
 
@@ -78,7 +79,7 @@ class ApprovalController extends Controller
                 'verified_at' => date('d/m/Y H:i', strtotime($proof->verified_at)),
                 'verified_by' => $proof->verified_by_name,
                 'note' => $proof->note ?? '',
-                'photo' => $proof->photo_path ? asset('storage/'.$proof->photo_path) : null,
+                'photo' => FormatHelper::proofPhotoUrl($proof->photo_path),
             ];
         }
 

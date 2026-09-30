@@ -13,6 +13,9 @@ $initials = $user ? strtoupper(substr($user->name, 0, 2)) : '?';
 <p class="profile-hero__email">Masuk untuk akses penuh</p>
 @endif
 <div class="profile-stats profile-stats--single">
-<div class="profile-stat"><strong>{{ $user ? '—' : '—' }}</strong><span>Pesanan</span></div>
+<a href="{{ $user ? route('toko.transaksi.index') : route('toko.login') }}" class="profile-stat" style="text-decoration:none; color:inherit;">
+    <strong>{{ $user ? ($orderCounts['total'] ?? 0) : 0 }}</strong>
+    <span>Total Pesanan</span>
+</a>
 </div>
 </div>

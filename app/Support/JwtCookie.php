@@ -12,10 +12,10 @@ class JwtCookie
 
     public const REFRESH = 'mt_refresh';
 
-    public static function attach(Response|RedirectResponse $response, string $accessToken, string $refreshToken): Response|RedirectResponse
+    public static function attach(Response|RedirectResponse $response, string $accessToken, string $refreshToken, bool $remember = false): Response|RedirectResponse
     {
         $accessMinutes = (int) config('jwt.ttl', 60);
-        $refreshMinutes = (int) config('jwt.refresh_ttl', 20160);
+        $refreshMinutes = $remember ? 43200 : (int) config('jwt.refresh_ttl', 20160);
 
         return $response
             ->withCookie(self::make(self::ACCESS, $accessToken, $accessMinutes))

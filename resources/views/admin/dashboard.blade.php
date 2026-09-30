@@ -187,8 +187,8 @@
 <div class="panel-quick">
 <a href="{{ route('admin.produk.create') }}" class="panel-quick__btn panel-card-hover">+ Tambah Produk</a>
 <a href="{{ route('admin.kategori.create') }}" class="panel-quick__btn panel-quick__btn--outline panel-card-hover">+ Tambah Kategori</a>
-<a href="{{ route('admin.approval.index') }}" class="panel-quick__btn panel-quick__btn--outline panel-card-hover">Verifikasi Pengambilan (4)</a>
-<a href="{{ route('admin.laporan.index') }}" class="panel-quick__btn panel-quick__btn--outline panel-card-hover">Lihat Laporan</a>
-<a href="{{ route('admin.settings.midtrans') }}" class="panel-quick__btn panel-quick__btn--outline panel-card-hover">⚙ Pengaturan Midtrans</a>
+<a href="{{ route('admin.approval.index') }}" class="panel-quick__btn panel-quick__btn--outline panel-card-hover">Verifikasi Pengambilan</a>
+<a href="{{ route('admin.produk.index') }}" class="panel-quick__btn panel-quick__btn--outline panel-card-hover">📦 Data Produk</a>
+<a href="{{ route('admin.laporan.index') }}" class="panel-quick__btn panel-quick__btn--outline panel-card-hover">📊 Lihat Laporan</a>
 </div>
 @endsection

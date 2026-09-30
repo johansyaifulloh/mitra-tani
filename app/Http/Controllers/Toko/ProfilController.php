@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Toko;
 
 use App\Http\Controllers\Controller;
+use App\Repositories\OrderRepository;
 use App\Support\JwtCookie;
 use Exception;
 use Illuminate\Http\Request;
@@ -10,9 +11,21 @@ use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class ProfilController extends Controller
 {
+    public function __construct(
+        private OrderRepository $orderRepository,
+    ) {}
+
     public function index(Request $request)
     {
         $user = null;
+        $orderCounts = [
+            'unpaid' => 0,
+            'ready_pickup' => 0,
+            'completed' => 0,
+            'cancelled' => 0,
+            'total' => 0,
+            'active' => 0,
+        ];
 
         $token = $request->cookie(JwtCookie::ACCESS);
 
@@ -24,6 +37,7 @@ class ProfilController extends Controller
                 if ($authUser && $authUser->role === 'customer') {
                     $user = $authUser;
                     auth('api')->setUser($user);
+                    $orderCounts = $this->orderRepository->getOrderCountsForUser($user->id);
                 }
             } catch (Exception $e) {
                 $user = null;
@@ -32,6 +46,7 @@ class ProfilController extends Controller
 
         return view('mobile.profil.index', [
             'user' => $user,
+            'orderCounts' => $orderCounts,
         ]);
     }
 }

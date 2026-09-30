@@ -153,4 +153,19 @@ class FormatHelper
             'pickup_proof' => null,
         ];
     }
+
+    public static function proofPhotoUrl(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://') || str_starts_with($path, 'data:')) {
+            return $path;
+        }
+
+        $filename = basename($path);
+
+        return url('bukti-foto/'.$filename);
+    }
 }

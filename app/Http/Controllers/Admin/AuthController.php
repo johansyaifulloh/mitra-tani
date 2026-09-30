@@ -20,9 +20,10 @@ class AuthController extends Controller
     {
         if ($request->cookie(JwtCookie::ACCESS)) {
             try {
-                JWTAuth::setToken($request->cookie(JwtCookie::ACCESS))->authenticate();
-
-                return redirect()->route('admin.dashboard');
+                $user = JWTAuth::setToken($request->cookie(JwtCookie::ACCESS))->authenticate();
+                if ($user) {
+                    return redirect()->route($user->role === 'owner' ? 'owner.dashboard' : 'admin.dashboard');
+                }
             } catch (Exception $e) {
                 // show login
             }
@@ -37,9 +38,12 @@ class AuthController extends Controller
             $data = $request->validated();
             $tokens = $this->authService->login($data['identifier'], $data['password'], ['admin', 'owner']);
 
-            $response = redirect()->route('admin.dashboard');
+            $userRole = $tokens['user']['role'] ?? 'admin';
+            $targetRoute = ($userRole === 'owner') ? 'owner.dashboard' : 'admin.dashboard';
 
-            return JwtCookie::attach($response, $tokens['access_token'], $tokens['refresh_token']);
+            $response = redirect()->route($targetRoute);
+
+            return JwtCookie::attach($response, $tokens['access_token'], $tokens['refresh_token'], $request->boolean('remember', true));
         } catch (Exception $e) {
             return back()->withInput()->withErrors(['identifier' => $e->getMessage()]);
         }

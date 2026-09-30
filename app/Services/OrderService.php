@@ -23,6 +23,7 @@ class OrderService
         private ProductRepository $productRepository,
         private UserRepository $userRepository,
         private MidtransService $midtransService,
+        private \App\Repositories\PickupProofRepository $pickupProofRepository,
     ) {}
 
     public function createFromCheckout(int $userId, array $data): object
@@ -171,8 +172,28 @@ class OrderService
         }
     }
 
+    public function expireOverdueOrders(): int
+    {
+        $overdueOrders = $this->orderRepository->getOverduePendingOrders();
+        $count = 0;
+
+        foreach ($overdueOrders as $order) {
+            $this->orderRepository->update($order->id, [
+                'payment_status' => 'expired',
+                'updated_at' => now(),
+            ]);
+            $this->restoreStockForOrder($order->id);
+            $count++;
+        }
+
+        return $count;
+    }
+
     public function listForUser(int $userId, ?string $status = null): array
     {
+        // Auto-expire pesanan yang sudah melewati batas waktu bayar (24 jam)
+        $this->expireOverdueOrders();
+
         // STEP 1: Tentukan filter status pembayaran (null = semua)
         $paymentStatus = in_array($status, ['menunggu_pembayaran', 'lunas', 'expired'], true)
             ? $status
@@ -182,7 +203,7 @@ class OrderService
         $orders = $this->orderRepository->listForUser($userId, $paymentStatus);
 
         // STEP 3: Hitung jumlah per status untuk badge tab
-        $counts = $this->orderRepository->countByPaymentStatusForUser($userId);
+        $orderCounts = $this->orderRepository->getOrderCountsForUser($userId);
 
         // STEP 4: Format data untuk view
         $items = $orders->map(function ($order) {
@@ -207,7 +228,7 @@ class OrderService
                 'pickup_label' => $pickupInfo['label'],
                 'pickup_tone' => $pickupInfo['tone'],
                 'pickup_desc' => $pickupInfo['desc'],
-                'proof_photo' => ! empty($order->proof_photo) ? asset('storage/'.$order->proof_photo) : null,
+                'proof_photo' => FormatHelper::proofPhotoUrl($order->proof_photo ?? null),
                 'proof_note' => $order->proof_note ?? null,
                 'proof_verifier' => $order->proof_verifier ?? null,
                 'proof_verified_at' => ! empty($order->proof_verified_at) ? date('d M Y, H:i', strtotime($order->proof_verified_at)) : null,
@@ -225,10 +246,11 @@ class OrderService
         return [
             'orders' => $items,
             'counts' => [
-                'all' => array_sum($counts),
-                'menunggu_pembayaran' => $counts['menunggu_pembayaran'] ?? 0,
-                'lunas' => $counts['lunas'] ?? 0,
-                'expired' => $counts['expired'] ?? 0,
+                'all' => $orderCounts['total'],
+                'menunggu_pembayaran' => $orderCounts['unpaid'],
+                'lunas' => $orderCounts['ready_pickup'],
+                'selesai' => $orderCounts['completed'],
+                'expired' => $orderCounts['cancelled'],
             ],
             'active' => $status ?? 'all',
         ];
@@ -251,19 +273,40 @@ class OrderService
             ])
             ->all();
 
+        $proof = $this->pickupProofRepository->findByOrderId($order->id);
+        $pickupInfo = FormatHelper::pickupStatusLabel($order->pickup_status ?? null);
+        $paymentInfo = FormatHelper::paymentStatusLabel($order->payment_status);
+
         return [
+            'id' => $order->id,
             'code' => $order->code,
             'total' => (float) $order->total,
             'total_label' => FormatHelper::rupiah($order->total),
             'subtotal_label' => FormatHelper::rupiah($order->subtotal),
             'admin_fee_label' => FormatHelper::rupiah($order->admin_fee),
             'payment_status' => $order->payment_status,
+            'payment_status_label' => $paymentInfo['label'],
+            'payment_tone' => $paymentInfo['tone'],
+            'payment_method' => FormatHelper::paymentMethodLabel($order->payment_method ?? null),
+            'pickup_status' => $order->pickup_status,
+            'pickup_label' => $pickupInfo['label'],
+            'pickup_tone' => $pickupInfo['tone'],
+            'pickup_desc' => $pickupInfo['desc'],
             'buyer_name' => $order->buyer_name,
             'buyer_phone' => $order->buyer_phone,
             'address_text' => $order->address_text ?? '—',
             'snap_token' => $order->snap_token,
+            'created_at_label' => date('d M Y, H:i', strtotime($order->created_at)),
+            'paid_at_label' => $order->paid_at ? date('d M Y, H:i', strtotime($order->paid_at)) : null,
             'expired_at' => $order->expired_at,
+            'expired_at_label' => $order->expired_at ? date('d M Y, H:i', strtotime($order->expired_at)) : null,
             'items' => $items,
+            'proof' => $proof ? [
+                'photo' => FormatHelper::proofPhotoUrl($proof->photo_path),
+                'note' => $proof->note ?? '',
+                'verified_by' => $proof->verified_by_name ?? 'Admin Mantri Tani',
+                'verified_at' => date('d M Y, H:i', strtotime($proof->verified_at)),
+            ] : null,
         ];
     }
 

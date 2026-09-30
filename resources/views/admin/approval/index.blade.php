@@ -78,11 +78,6 @@
 <button type="submit" class="panel-btn" id="btn-verify" disabled title="Ambil foto bukti dari kamera terlebih dahulu">✓ Verifikasi Barang Sudah Diambil</button>
 </div>
 </form>
-<form action="{{ route('admin.approval.reject') }}" method="POST" class="panel-form__actions panel-form__actions--left" style="margin-top:0">
-@csrf
-<input type="hidden" name="order_id" value="{{ $selected['order_id'] ?? '' }}">
-<button type="submit" class="panel-btn panel-btn--outline panel-btn--danger">Tolak</button>
-</form>
 @elseif(in_array($selected['status'], ['disetujui', 'selesai']) && ($selected['pickup_proof'] ?? null))
 <x-admin.pickup-proof-view :proof="$selected['pickup_proof']" :transaction-id="$selected['id']" />
 <p class="panel-text-info panel-text-info--mt">Barang sudah diambil pelanggan dan diverifikasi admin.</p>

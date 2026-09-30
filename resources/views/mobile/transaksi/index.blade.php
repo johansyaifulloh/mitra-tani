@@ -11,10 +11,11 @@
 @section('content')
 @php
 $tabs = [
-    'all' => ['label' => 'Semua', 'count' => $counts['all']],
-    'menunggu_pembayaran' => ['label' => 'Belum Bayar', 'count' => $counts['menunggu_pembayaran']],
-    'lunas' => ['label' => 'Lunas', 'count' => $counts['lunas']],
-    'expired' => ['label' => 'Kadaluarsa', 'count' => $counts['expired']],
+    'all' => ['label' => 'Semua', 'count' => $counts['all'] ?? 0],
+    'menunggu_pembayaran' => ['label' => 'Belum Bayar', 'count' => $counts['menunggu_pembayaran'] ?? 0],
+    'lunas' => ['label' => 'Siap Diambil', 'count' => $counts['lunas'] ?? 0],
+    'selesai' => ['label' => 'Selesai', 'count' => $counts['selesai'] ?? 0],
+    'expired' => ['label' => 'Dibatalkan', 'count' => $counts['expired'] ?? 0],
 ];
 $toneClass = [
     'success' => 'bg-emerald-50 text-emerald-700',
@@ -153,18 +154,36 @@ Lihat Bukti Pengambilan
 </div>
 @endif
 
-<div id="proof-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 p-6">
-<div class="bg-white w-full max-w-[300px] rounded-2xl p-4 animate-fade-up max-h-[85vh] overflow-y-auto">
-<div class="flex items-center justify-between mb-2">
-<h3 class="font-bold text-gray-800 text-sm">Bukti Pengambilan</h3>
-<button type="button" id="proof-close" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm">✕</button>
+<div id="proof-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in">
+<div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl animate-fade-up max-h-[88vh] overflow-y-auto border border-gray-100">
+<div class="flex items-center justify-between pb-3 border-b border-gray-100">
+    <div class="flex items-center gap-2">
+        <span class="text-base">📸</span>
+        <h3 class="font-extrabold text-gray-800 text-sm">Bukti Pengambilan Barang</h3>
+    </div>
+    <button type="button" id="proof-close" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-bold transition-colors">✕</button>
 </div>
-<p class="text-[11px] text-gray-400 mb-2" id="proof-code"></p>
-<img id="proof-img" src="" alt="Bukti pengambilan" class="w-full rounded-xl object-cover max-h-48 bg-gray-100">
-<div class="mt-3 text-sm text-gray-600 space-y-1">
-<p id="proof-verifier-wrap" class="hidden">Diverifikasi oleh: <span class="font-semibold text-gray-800" id="proof-verifier"></span></p>
-<p id="proof-time-wrap" class="hidden text-xs text-gray-400"></p>
-<p id="proof-note-wrap" class="hidden bg-gray-50 rounded-xl p-3 text-xs text-gray-600 mt-2"><span class="font-semibold">Catatan:</span> <span id="proof-note"></span></p>
+<div class="flex items-center justify-between mt-3 mb-2">
+    <p class="text-xs font-mono font-bold text-gray-700" id="proof-code"></p>
+    <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+        ✓ Terverifikasi
+    </span>
+</div>
+<div class="relative overflow-hidden rounded-2xl bg-gray-50 border border-gray-200">
+    <img id="proof-img" src="" alt="Bukti pengambilan" class="w-full object-cover max-h-56 bg-gray-100" onerror="this.onerror=null; this.src='{{ route('bukti-foto', 'placeholder.svg') }}';">
+</div>
+<div class="mt-3 text-xs space-y-1.5 bg-gray-50/70 p-3 rounded-2xl border border-gray-100">
+    <p id="proof-verifier-wrap" class="hidden flex justify-between text-gray-600">
+        <span>Diverifikasi oleh:</span>
+        <strong class="text-gray-900 font-semibold" id="proof-verifier"></strong>
+    </p>
+    <p id="proof-time-wrap" class="hidden flex justify-between text-gray-600">
+        <span>Waktu Verifikasi:</span>
+        <span class="text-gray-900 font-semibold" id="proof-time"></span>
+    </p>
+    <div id="proof-note-wrap" class="hidden bg-emerald-50/80 rounded-xl p-2.5 text-xs text-emerald-900 mt-2 border border-emerald-100">
+        <span class="font-bold">Catatan:</span> <span id="proof-note"></span>
+    </div>
 </div>
 </div>
 </div>

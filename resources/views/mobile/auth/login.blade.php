@@ -78,14 +78,10 @@
 
             <div class="auth-form__extras">
                 <label class="auth-checkbox">
-                    <input type="checkbox" name="remember">
+                    <input type="checkbox" name="remember" checked>
                     <span>Ingat saya</span>
                 </label>
                 <a href="{{ route('toko.forgot-password') }}" class="auth-link">Lupa password?</a>
-            </div>
-
-            <div style="margin-bottom: 12px;">
-                <button type="button" onclick="fillCustomer()" style="width:100%;padding:8px 12px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#047857;font-size:12px;font-weight:600;cursor:pointer;">👤 Isi Cepat Akun Demo (Andi - Pelanggan)</button>
             </div>
 
             <button type="submit" class="auth-submit">
@@ -107,10 +103,6 @@
 </div>
 
 <script>
-function fillCustomer() {
-    document.getElementById('identifier').value = 'andi@example.com';
-    document.getElementById('password').value = 'password';
-}
 function togglePassword() {
     const input = document.getElementById('password');
     input.type = input.type === 'password' ? 'text' : 'password';

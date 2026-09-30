@@ -32,15 +32,13 @@ else (tidak)
 endif
 
 |Admin|
-:Verifikasi kode transaksi;
-:Foto bukti pengambilan;
-if (Valid?) then (ya)
-  :Verifikasi → barang sudah diambil;
-else (tidak)
-  :Tolak pengambilan;
-endif
+:Input & cocokkan kode transaksi;
+:Ambil foto kamera bukti penyerahan barang;
+:Klik Verifikasi Barang Sudah Diambil;
+:Status pesanan berubah jadi Sudah Diambil;
 
 |Pelanggan|
+:Menerima barang & melihat bukti pengambilan;
 :Transaksi selesai;
 stop
 
